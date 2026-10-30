@@ -1,0 +1,33 @@
+name: Combine Game Files
+
+on:
+  push:
+    branches:
+      - main  # Change to your primary branch if different
+
+jobs:
+  combine:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Combine split zip files
+        run: |
+          if [ -f game.zip.part0 ] && [ -f game.zip.part1 ]; then
+            cat game.zip.part0 game.zip.part1 > game.zip
+            echo "Successfully combined parts into game.zip"
+          else
+            echo "Split parts not found!"
+          fi
+
+      - name: Commit combined game.zip
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game.zip
+          git commit -m "auto: combine split zip parts into game.zip" || exit 0
+          git push
